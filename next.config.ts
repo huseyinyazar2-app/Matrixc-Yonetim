@@ -4,15 +4,12 @@ const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
-  skipWaiting: true,
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Add any next config here
-  experimental: {
-    turbopack: {}
-  }
+  turbopack: {}
 };
 
 export default withPWA(nextConfig);
