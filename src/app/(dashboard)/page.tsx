@@ -3,8 +3,10 @@ import { transactions, users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { getSession } from "@/lib/auth";
 
 export default async function DashboardPage() {
+    const session = await getSession();
     // 1. Fetch all users
     const allUsers = await db.query.users.findMany();
 
@@ -19,9 +21,9 @@ export default async function DashboardPage() {
     let totalExpense = 0;
 
     // 4. Calculate User Balances
-    const userBalances: Record<string, { name: string; personalSpends: number; receivedPayouts: number; balance: number }> = {};
+    const userBalances: Record<string, { id: string; name: string; personalSpends: number; receivedPayouts: number; balance: number }> = {};
     for (const u of allUsers) {
-        userBalances[u.id] = { name: u.name, personalSpends: 0, receivedPayouts: 0, balance: 0 };
+        userBalances[u.id] = { id: u.id, name: u.name, personalSpends: 0, receivedPayouts: 0, balance: 0 };
     }
 
     let totalPersonalExpense = 0;
@@ -52,10 +54,14 @@ export default async function DashboardPage() {
     }
 
     // Calculate final net balance: (Spends out of pocket) - (Payouts received from Kasa)
-    const userBalanceList = Object.values(userBalances).map(u => {
+    let userBalanceList = Object.values(userBalances).map(u => {
         u.balance = u.personalSpends - u.receivedPayouts;
         return u;
     }).filter(u => u.balance !== 0 || u.personalSpends > 0);
+
+    if (session?.role !== "ADMIN") {
+        userBalanceList = userBalanceList.filter(u => u.id === session?.userId);
+    }
 
     const recentTransactionsData = await db.select({
         id: transactions.id,
@@ -68,8 +74,9 @@ export default async function DashboardPage() {
     })
         .from(transactions)
         .leftJoin(users, eq(transactions.userId, users.id))
+        .where(session?.role === "ADMIN" ? undefined : eq(transactions.userId, session?.userId as string))
         .orderBy(desc(transactions.date), desc(transactions.createdAt))
-        .limit(5);
+        .limit(10);
 
     return (
         <div className="space-y-6">

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { transactions, users } from "@/db/schema";
-import { eq, desc, inArray } from "drizzle-orm";
+import { eq, desc, inArray, and } from "drizzle-orm";
 import KasaForms from "./KasaForms";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
@@ -9,8 +9,8 @@ import { redirect } from "next/navigation";
 
 export default async function KasaPage() {
     const session = await getSession();
-    if (!session || session.role !== "ADMIN") {
-        redirect("/");
+    if (!session) {
+        redirect("/login");
     }
 
     // Kasaya giren çıkan tüm hareketleri getir (Kasa Kasası veya Diğer)
@@ -25,7 +25,10 @@ export default async function KasaPage() {
         })
         .from(transactions)
         .leftJoin(users, eq(transactions.userId, users.id))
-        .where(eq(transactions.source, "KASA"))
+        .where(session.role === "ADMIN"
+            ? eq(transactions.source, "KASA")
+            : and(eq(transactions.source, "KASA"), eq(transactions.userId, session.userId))
+        )
         .orderBy(desc(transactions.date), desc(transactions.createdAt))
         .limit(20);
 

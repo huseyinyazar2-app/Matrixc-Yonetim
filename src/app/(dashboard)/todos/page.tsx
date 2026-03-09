@@ -1,8 +1,9 @@
 import { db } from "@/db";
 import { todos } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { CheckSquare, Circle, CheckCircle2, Trash2 } from "lucide-react";
 import { addTodo, toggleTodo, deleteTodo } from "./actions";
+import { getSession } from "@/lib/auth";
 
 // Form component with useActionState needs to be a client component, but listing can be server.
 // To keep it simple and beautiful, I'll make the whole page client component or mixed.
@@ -10,7 +11,15 @@ import TodoForm from "./TodoForm";
 import TodoItem from "./TodoItem";
 
 export default async function TodosPage() {
+    const session = await getSession();
+
+    let whereClause = undefined;
+    if (session?.role !== "ADMIN") {
+        whereClause = eq(todos.createdBy, session?.name || session?.username || "");
+    }
+
     const allTodos = await db.query.todos.findMany({
+        where: whereClause,
         orderBy: [desc(todos.createdAt)],
     });
 

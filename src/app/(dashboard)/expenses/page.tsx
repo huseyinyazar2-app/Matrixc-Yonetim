@@ -1,11 +1,13 @@
 import { db } from "@/db";
 import { transactions, users } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import ExpensesForm from "./ExpensesForm";
 import { format } from "date-fns";
 import { tr } from "date-fns/locale";
+import { getSession } from "@/lib/auth";
 
 export default async function ExpensesPage() {
+    const session = await getSession();
     const recentExpenses = await db
         .select({
             id: transactions.id,
@@ -17,7 +19,10 @@ export default async function ExpensesPage() {
         })
         .from(transactions)
         .leftJoin(users, eq(transactions.userId, users.id))
-        .where(eq(transactions.type, "EXPENSE"))
+        .where(session?.role === "ADMIN"
+            ? eq(transactions.type, "EXPENSE")
+            : and(eq(transactions.type, "EXPENSE"), eq(transactions.userId, session?.userId as string))
+        )
         .orderBy(desc(transactions.date), desc(transactions.createdAt))
         .limit(20);
 
