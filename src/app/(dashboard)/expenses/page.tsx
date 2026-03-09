@@ -1,104 +1,62 @@
-"use client";
+import { db } from "@/db";
+import { transactions, users } from "@/db/schema";
+import { eq, desc } from "drizzle-orm";
+import ExpensesForm from "./ExpensesForm";
+import { format } from "date-fns";
+import { tr } from "date-fns/locale";
 
-import { useActionState } from "react";
-import { addExpense } from "./actions";
-import { CheckCircle2, AlertCircle, Receipt, Plus } from "lucide-react";
-
-export default function ExpensesPage() {
-    const [state, formAction, isPending] = useActionState(addExpense, null);
+export default async function ExpensesPage() {
+    const recentExpenses = await db
+        .select({
+            id: transactions.id,
+            amount: transactions.amount,
+            description: transactions.description,
+            source: transactions.source,
+            date: transactions.date,
+            userName: users.name,
+        })
+        .from(transactions)
+        .leftJoin(users, eq(transactions.userId, users.id))
+        .where(eq(transactions.type, "EXPENSE"))
+        .orderBy(desc(transactions.date), desc(transactions.createdAt))
+        .limit(20);
 
     return (
         <div className="space-y-6">
-            <div className="glass-card p-6 md:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center border border-purple-500/30">
-                        <Receipt className="w-5 h-5 text-purple-400" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">Yeni Harcama Ekle</h2>
-                        <p className="text-sm text-gray-400">Yaptığınız harcamaları buraya girerek kaydedebilirsiniz.</p>
-                    </div>
-                </div>
-
-                <form action={formAction} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tutar (₺)</label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
-                                name="amount"
-                                required
-                                className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                placeholder="0.00"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Açıklama / Nereye Harcandı?</label>
-                            <input
-                                type="text"
-                                name="description"
-                                required
-                                className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                placeholder="Örn: Ofis Kırtasiye"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Tarih</label>
-                            <input
-                                type="date"
-                                name="date"
-                                required
-                                defaultValue={new Date().toISOString().split("T")[0]}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ödeme Kaynağı</label>
-                            <select
-                                name="source"
-                                required
-                                className="w-full bg-[#111827] border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none"
-                            >
-                                <option value="KASA">Şirket Kasasından</option>
-                                <option value="PERSONAL">Kendi Cebimden</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="pt-2">
-                        {state?.error && (
-                            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-400">
-                                <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                                <p className="text-sm">{state.error}</p>
-                            </div>
-                        )}
-                        {state?.success && (
-                            <div className="mb-4 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-2 text-emerald-400">
-                                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                                <p className="text-sm">{state.success}</p>
-                            </div>
-                        )}
-
-                        <button
-                            type="submit"
-                            disabled={isPending}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:pointer-events-none"
-                        >
-                            <Plus className="w-5 h-5" />
-                            {isPending ? "Ekleniyor..." : "Harcamayı Kaydet"}
-                        </button>
-                    </div>
-                </form>
-            </div>
+            <ExpensesForm />
 
             <div className="glass-card overflow-hidden mt-8">
-                <div className="p-6 border-b border-white/5">
-                    <h3 className="font-semibold text-white text-lg">Tüm Harcamalar Görüntülemek için Raporlara Gidin</h3>
+                <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Son Harcamalar (Harcama Geçmişi)</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Eklenen harcamalar anında burada listelenir.</p>
+                </div>
+
+                <div className="divide-y divide-gray-200 dark:divide-gray-800">
+                    {recentExpenses.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500 dark:text-gray-400">Henüz harcama kaydedilmemiş.</div>
+                    ) : (
+                        recentExpenses.map((expense) => (
+                            <div key={expense.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <p className="font-semibold text-gray-900 dark:text-white">{expense.description}</p>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${expense.source === 'KASA' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'}`}>
+                                            {expense.source === 'KASA' ? 'Kasadan' : 'Cebinden'}
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {format(new Date(expense.date), "dd MMMM yyyy", { locale: tr })} - Ekleyen: {expense.userName}
+                                    </p>
+                                </div>
+
+                                <div className="text-right">
+                                    <span className="font-mono text-lg font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-3 py-1 rounded-lg">
+                                        - {expense.amount.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺
+                                    </span>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>

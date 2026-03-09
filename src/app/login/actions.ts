@@ -3,7 +3,6 @@
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { encrypt } from "@/lib/auth";
-import * as bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -26,7 +25,7 @@ export async function login(prevState: any, formData: FormData) {
             return { error: "Geçersiz kullanıcı adı veya şifre." };
         }
 
-        const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+        const isValidPassword = password === user.password;
 
         if (!isValidPassword) {
             return { error: "Geçersiz kullanıcı adı veya şifre." };

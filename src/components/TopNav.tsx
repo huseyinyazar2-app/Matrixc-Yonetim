@@ -2,16 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, Wallet, CheckSquare, BarChart3, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Receipt, Wallet, CheckSquare, BarChart3, LogOut, Menu, X, Sun, Moon, Users } from "lucide-react";
 import useSWR from "swr";
+import { useTheme } from "next-themes";
 import { useState } from "react";
 import { logout } from "@/app/login/actions";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function TopNav() {
+export default function TopNav({ role }: { role?: string }) {
     const pathname = usePathname();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { theme, setTheme } = useTheme();
 
     // Poll every 5 seconds for real-time feel
     const { data } = useSWR("/api/todos/count", fetcher, {
@@ -29,6 +31,10 @@ export default function TopNav() {
         { href: "/reports", label: "Raporlar", icon: BarChart3 },
     ];
 
+    if (role === "ADMIN") {
+        links.push({ href: "/users", label: "Personel", icon: Users });
+    }
+
     return (
         <nav className="sticky top-0 z-50 w-full glass border-b border-white/10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,7 +44,7 @@ export default function TopNav() {
                             <div className="w-9 h-9 bg-gradient-to-tr from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
                                 <span className="text-white font-bold text-lg leading-none">M</span>
                             </div>
-                            <span className="text-xl font-bold text-white tracking-tight hidden sm:block">Matrixc</span>
+                            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-tight hidden sm:block">Matrixc</span>
                         </Link>
                     </div>
 
@@ -52,7 +58,7 @@ export default function TopNav() {
                                     key={link.href}
                                     href={link.href}
                                     className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center gap-2
-                    ${isActive ? "text-white bg-white/10 shadow-inner" : "text-gray-400 hover:text-white hover:bg-white/5"}
+                    ${isActive ? "text-gray-900 bg-black/5 dark:text-white dark:bg-white/10 shadow-inner" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"}
                   `}
                                 >
                                     <Icon className={`w-4 h-4 ${isActive ? "text-purple-400" : ""}`} />
@@ -66,7 +72,14 @@ export default function TopNav() {
                             );
                         })}
 
-                        <div className="w-px h-6 bg-white/10 mx-3"></div>
+                        <div className="w-px h-6 bg-gray-300 dark:bg-white/10 mx-3"></div>
+
+                        <button
+                            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                            className="p-2 rounded-xl text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+                        >
+                            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                        </button>
 
                         <button
                             onClick={() => logout()}
@@ -107,7 +120,7 @@ export default function TopNav() {
                                     href={link.href}
                                     onClick={() => setMobileMenuOpen(false)}
                                     className={`flex items-center justify-between px-4 py-3.5 rounded-2xl text-base font-medium transition-all
-                    ${isActive ? "text-white bg-white/10" : "text-gray-400 hover:text-white hover:bg-white/5"}
+                    ${isActive ? "text-gray-900 bg-black/5 dark:text-white dark:bg-white/10" : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"}
                   `}
                                 >
                                     <div className="flex items-center gap-3">
