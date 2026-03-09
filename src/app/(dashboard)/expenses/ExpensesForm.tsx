@@ -26,7 +26,7 @@ export default function ExpensesForm() {
     const [state, formAction] = useActionState(addExpense, initialState);
     const formRef = useRef<HTMLFormElement>(null);
 
-    if (state.success && formRef.current) {
+    if (state && 'success' in state && state.success && formRef.current) {
         formRef.current.reset();
     }
 

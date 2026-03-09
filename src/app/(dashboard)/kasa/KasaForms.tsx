@@ -43,8 +43,8 @@ export default function KasaForms() {
     const incomeRef = useRef<HTMLFormElement>(null);
     const outflowRef = useRef<HTMLFormElement>(null);
 
-    if (incomeState.success && incomeRef.current) incomeRef.current.reset();
-    if (outflowState.success && outflowRef.current) outflowRef.current.reset();
+    if (incomeState && 'success' in incomeState && incomeState.success && incomeRef.current) incomeRef.current.reset();
+    if (outflowState && 'success' in outflowState && outflowState.success && outflowRef.current) outflowRef.current.reset();
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -25,8 +25,8 @@ export default async function TodosPage() {
                         <CheckSquare className="w-5 h-5 text-indigo-400" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-white tracking-tight">Yapılacaklar Listesi</h2>
-                        <p className="text-sm text-gray-400">Şirket içi görev takibini ve acil işleri buradan yönetin.</p>
+                        <h2 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">Yapılacaklar Listesi</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Şirket içi görev takibini ve acil işleri buradan yönetin.</p>
                     </div>
                 </div>
 
@@ -34,8 +34,8 @@ export default async function TodosPage() {
             </div>
 
             <div className="glass-card overflow-hidden">
-                <div className="p-6 border-b border-white/5">
-                    <h3 className="font-semibold text-white text-lg">Bekleyen Görevler ({uncompleted.length})</h3>
+                <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/5">
+                    <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Bekleyen Görevler ({uncompleted.length})</h3>
                 </div>
                 <div className="divide-y divide-white/5">
                     {uncompleted.length === 0 ? (
@@ -48,8 +48,8 @@ export default async function TodosPage() {
 
             {completed.length > 0 && (
                 <div className="glass-card overflow-hidden opacity-70">
-                    <div className="p-6 border-b border-white/5">
-                        <h3 className="font-semibold text-white text-lg">Tamamlanan Görevler ({completed.length})</h3>
+                    <div className="p-6 border-b border-gray-200 dark:border-white/5 bg-gray-50/50 dark:bg-white/5 backdrop-blur-sm">
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-lg">Tamamlanan Görevler ({completed.length})</h3>
                     </div>
                     <div className="divide-y divide-white/5">
                         {completed.map(todo => <TodoItem key={todo.id} todo={todo} />)}

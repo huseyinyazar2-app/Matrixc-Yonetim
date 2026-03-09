@@ -27,7 +27,7 @@ export default function UsersForm() {
     const [state, formAction] = useActionState(addUser, initialState);
     const formRef = useRef<HTMLFormElement>(null);
 
-    if (state.success && formRef.current) {
+    if (state && 'success' in state && state.success && formRef.current) {
         formRef.current.reset();
     }
 

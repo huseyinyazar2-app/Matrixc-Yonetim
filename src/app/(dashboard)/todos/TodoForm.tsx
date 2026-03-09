@@ -21,30 +21,33 @@ export default function TodoForm() {
         >
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 space-y-1">
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Görev Adı</label>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Görev Adı</label>
                     <input
                         type="text"
                         name="task"
                         required
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-2.5 px-4 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                        placeholder="Örn: Aylık raporu hazırla"
+                        className="w-full bg-white/50 dark:bg-black/20 border border-gray-300 dark:border-white/10 rounded-xl py-2.5 px-4 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        placeholder="Örn: Aylık faturaların ödenmesi"
                     />
                 </div>
 
                 <div className="w-full md:w-48 space-y-1">
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Aciliyet</label>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aciliyet</label>
                     <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <AlertTriangle className="h-4 w-4 text-indigo-500" />
+                        </div>
                         <select
                             name="urgency"
                             required
                             defaultValue="NORMAL"
-                            className="w-full bg-[#111827] border border-white/10 rounded-xl py-2.5 px-4 pl-10 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+                            className="w-full bg-white/50 dark:bg-[#111827] border border-gray-300 dark:border-white/10 rounded-xl py-2.5 px-4 pl-10 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
                         >
                             <option value="NORMAL">🟢 Normal</option>
                             <option value="ACİL">🟠 Acil</option>
                             <option value="ÇOK ACİL">🔴 Çok Acil</option>
                         </select>
-                        <Flag className="w-4 h-4 text-gray-500 absolute left-3 top-3 pointer-events-none" />
+                        <Flag className="w-4 h-4 text-gray-500 absolute right-3 top-3 pointer-events-none" />
                     </div>
                 </div>
             </div>
